@@ -68,7 +68,7 @@
       <button class="close-drawer" type="button" aria-label="<?php esc_attr_e('Close menu', 'leather-laundry'); ?>">&times;</button>
     </div>
 
-    <div class="mobile-menu-wrap">
+    <div class="mobile-menu-wrap" data-mobile-accordion-root>
       <?php
       if (has_nav_menu('primary')) {
           wp_nav_menu([
@@ -83,38 +83,121 @@
       ?>
     </div>
 
-    <div class="mobile-section">
-      <h4><?php esc_html_e('Services', 'leather-laundry'); ?></h4>
-      <?php
-      if (has_nav_menu('services')) {
-          wp_nav_menu([
-              'theme_location' => 'services',
-              'container' => false,
-              'depth' => 1,
-              'fallback_cb' => false,
-          ]);
-      } else {
-          tll_render_services_menu_list();
-      }
-      ?>
+    <div class="mobile-section mobile-accordion-item">
+      <button class="mobile-section-toggle" type="button" aria-expanded="false">
+        <span><?php esc_html_e('Services', 'leather-laundry'); ?></span>
+        <span class="mobile-caret" aria-hidden="true">›</span>
+      </button>
+      <div class="mobile-section-content">
+        <?php
+        if (has_nav_menu('services')) {
+            wp_nav_menu([
+                'theme_location' => 'services',
+                'container' => false,
+                'depth' => 1,
+                'fallback_cb' => false,
+            ]);
+        } else {
+            tll_render_services_menu_list();
+        }
+        ?>
+      </div>
     </div>
 
-    <div class="mobile-section">
-      <h4><?php esc_html_e('Cities', 'leather-laundry'); ?></h4>
-      <?php
-      if (has_nav_menu('cities')) {
-          wp_nav_menu([
-              'theme_location' => 'cities',
-              'container' => false,
-              'depth' => 1,
-              'fallback_cb' => false,
-          ]);
-      } else {
-          tll_render_cities_menu_list();
-      }
-      ?>
+    <div class="mobile-section mobile-accordion-item">
+      <button class="mobile-section-toggle" type="button" aria-expanded="false">
+        <span><?php esc_html_e('Cities', 'leather-laundry'); ?></span>
+        <span class="mobile-caret" aria-hidden="true">›</span>
+      </button>
+      <div class="mobile-section-content">
+        <?php
+        if (has_nav_menu('cities')) {
+            wp_nav_menu([
+                'theme_location' => 'cities',
+                'container' => false,
+                'depth' => 1,
+                'fallback_cb' => false,
+            ]);
+        } else {
+            tll_render_cities_menu_list();
+        }
+        ?>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var drawer = document.getElementById('mobileDrawer');
+  var openButton = document.querySelector('.nav-toggle');
+  var closeButton = document.querySelector('.close-drawer');
+
+  if (drawer && openButton) {
+    openButton.addEventListener('click', function () {
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      openButton.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+
+  if (drawer && closeButton && openButton) {
+    closeButton.addEventListener('click', function () {
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      openButton.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    });
+  }
+
+  if (drawer) {
+    drawer.addEventListener('click', function (event) {
+      if (!event.target.classList.contains('mobile-drawer')) {
+        return;
+      }
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      if (openButton) {
+        openButton.setAttribute('aria-expanded', 'false');
+      }
+      document.body.style.overflow = '';
+    });
+  }
+
+  document.querySelectorAll('.mobile-menu-wrap .menu-item-has-children').forEach(function (item) {
+    var link = item.querySelector(':scope > a');
+    var subMenu = item.querySelector(':scope > .sub-menu');
+
+    if (!link || !subMenu) {
+      return;
+    }
+
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'mobile-accordion-toggle';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Toggle submenu');
+    toggle.innerHTML = '<span class="mobile-caret" aria-hidden="true">›</span>';
+    link.insertAdjacentElement('afterend', toggle);
+
+    toggle.addEventListener('click', function () {
+      var isOpen = item.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+  });
+
+  document.querySelectorAll('.mobile-section-toggle').forEach(function (toggle) {
+    toggle.addEventListener('click', function () {
+      var wrapper = toggle.closest('.mobile-accordion-item');
+      if (!wrapper) {
+        return;
+      }
+      var isOpen = wrapper.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+  });
+});
+</script>
 
 <main id="content" class="site-main">
